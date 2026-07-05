@@ -1,0 +1,6 @@
+{
+  "name": "Mood Tracker",
+  "description": "A calming pastel-designed mood tracker with personalized AI-generated reflections and coping tips.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
