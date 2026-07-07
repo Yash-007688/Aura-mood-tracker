@@ -117,3 +117,48 @@ export const MOODS_CONFIG: Record<MoodType, MoodConfig> = {
     ]
   }
 };
+
+export type BreathingTechnique = 'box' | '478' | 'equal';
+
+export interface TechniqueConfig {
+  name: string;
+  description: string;
+  phases: {
+    name: string;
+    duration: number;
+    scale: number;
+    color: string;
+    instruction: string;
+  }[];
+}
+
+export const BREATHING_TECHNIQUES: Record<BreathingTechnique, TechniqueConfig> = {
+  box: {
+    name: 'Box Breathing',
+    description: 'Relieve stress, clear the mind, and balance energy.',
+    phases: [
+      { name: 'Inhale', duration: 4, scale: 1.5, color: 'bg-emerald-200/40 border-emerald-400', instruction: 'Breathe in slowly through your nose...' },
+      { name: 'Hold (In)', duration: 4, scale: 1.5, color: 'bg-teal-200/40 border-teal-400', instruction: 'Gently suspend your breath...' },
+      { name: 'Exhale', duration: 4, scale: 1.0, color: 'bg-sky-200/40 border-sky-400', instruction: 'Exhale fully, letting go of tension...' },
+      { name: 'Hold (Out)', duration: 4, scale: 1.0, color: 'bg-purple-200/40 border-purple-400', instruction: 'Rest in the quiet stillness...' }
+    ]
+  },
+  '478': {
+    name: '4-7-8 Breathing',
+    description: 'Act as a natural tranquilizer for the nervous system.',
+    phases: [
+      { name: 'Inhale', duration: 4, scale: 1.4, color: 'bg-emerald-200/40 border-emerald-400', instruction: 'Inhale quietly through your nose for 4s...' },
+      { name: 'Hold', duration: 7, scale: 1.5, color: 'bg-teal-200/40 border-teal-400', instruction: 'Hold your breath for 7s...' },
+      { name: 'Exhale', duration: 8, scale: 1.0, color: 'bg-sky-200/40 border-sky-400', instruction: 'Exhale completely with a whoosh sound for 8s...' }
+    ]
+  },
+  equal: {
+    name: 'Equal Breathing (Sama Vritti)',
+    description: 'Establish a steady, calming rhythm for focus and balance.',
+    phases: [
+      { name: 'Inhale', duration: 4, scale: 1.5, color: 'bg-emerald-200/40 border-emerald-400', instruction: 'Breathe in steadily for 4s...' },
+      { name: 'Exhale', duration: 4, scale: 1.0, color: 'bg-sky-200/40 border-sky-400', instruction: 'Breathe out steadily for 4s...' }
+    ]
+  }
+};
+

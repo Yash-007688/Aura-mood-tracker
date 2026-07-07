@@ -129,6 +129,47 @@ Guidelines for your response:
   }
 });
 
+app.post("/api/generate-weekly-report", async (req: express.Request, res: express.Response) => {
+  try {
+    const { history } = req.body;
+    if (!history || !Array.isArray(history) || history.length === 0) {
+      return res.status(400).json({ error: "History is required to generate a weekly report." });
+    }
+
+    const ai = getGeminiClient();
+
+    const historyText = history
+      .slice(0, 15) // Keep last 15 entries
+      .map((h: any) => `- ${new Date(h.date).toLocaleDateString()}: Felt ${h.mood}${h.customMoodName ? ` (${h.customMoodName})` : ""}${h.note ? `. Note: ${h.note}` : ""}`)
+      .join("\n");
+
+    const prompt = `You are a warm, wise, and deeply compassionate emotional wellness companion. Your task is to analyze the user's recent emotional logs and write a gentle, supportive "Weekly Aura Insights Report".
+    
+Here are the user's recent mood logs:
+${historyText}
+
+Guidelines for your report:
+1. Start with a warm, encouraging title or greeting.
+2. Group your response into 3 short, readable sections:
+   - **Patterns Observed**: Highlight any gentle connections or trends in their emotions (e.g. "You've felt calm on days you walked, or had anxious moments during deadlines").
+   - **Gentle Support & Care**: A validating reflection on how they have navigated their emotions.
+   - **Mindful Micro-Goals**: 2-3 tiny, actionable wellness suggestions for the upcoming days (like "Take a 2-minute stretch when feeling anxious" or "Celebrate one small joy today").
+3. Keep the tone warm, welcoming, and easy to read. Do not sound clinical, diagnostic, or like a therapist.
+4. Total length should be around 150-250 words. Format with clean, simple markdown (bold headings, bullet points).`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+    });
+
+    const report = response.text || "Your emotional journey is unique and valid. Take a gentle breath as you navigate the days ahead.";
+    res.json({ report });
+  } catch (error: any) {
+    console.error("Error generating weekly report:", error);
+    res.status(500).json({ error: error.message || "An error occurred while generating weekly report." });
+  }
+});
+
 // Vite / static file serving
 const startServer = async () => {
   if (process.env.NODE_ENV !== "production") {
