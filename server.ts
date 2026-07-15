@@ -12,23 +12,19 @@ const PORT = 3000;
 app.use(express.json());
 
 // Initialize Gemini SDK lazily to avoid crashes if API key is not present on start
-let aiInstance: GoogleGenAI | null = null;
-function getGeminiClient() {
-  if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not defined. Please configure it in your secrets.");
-    }
-    aiInstance = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        }
-      }
-    });
+function getGeminiClient(customKey?: string) {
+  const apiKey = customKey || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API key is not configured. Please define it in your backend .env or provide a custom key during Sign In.");
   }
-  return aiInstance;
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
 }
 
 // Agent Skill: Coping Toolkit — activates structured coping exercises based on mood triggers.
@@ -86,7 +82,8 @@ app.post("/api/generate-reflection", async (req: express.Request, res: express.R
     // Check if the Coping Toolkit should be triggered
     const coping = invokeCopingToolkit(mood, moodKey);
 
-    const ai = getGeminiClient();
+    const clientKey = req.headers["x-api-key"] as string | undefined;
+    const ai = getGeminiClient(clientKey);
 
     let historyText = "";
     if (history && Array.isArray(history) && history.length > 0) {
@@ -136,7 +133,8 @@ app.post("/api/generate-weekly-report", async (req: express.Request, res: expres
       return res.status(400).json({ error: "History is required to generate a weekly report." });
     }
 
-    const ai = getGeminiClient();
+    const clientKey = req.headers["x-api-key"] as string | undefined;
+    const ai = getGeminiClient(clientKey);
 
     const historyText = history
       .slice(0, 15) // Keep last 15 entries

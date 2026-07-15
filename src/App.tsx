@@ -36,10 +36,15 @@ const DEMO_ENTRIES: MoodEntry[] = [
   }
 ];
 
+import AuthModal from './components/AuthModal';
+
 export default function App() {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [activeTab, setActiveTab] = useState<'tracker' | 'breathing'>('tracker');
   const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [isLogged, setIsLogged] = useState<boolean>(() => {
+    return localStorage.getItem('aura_user_logged') === 'true';
+  });
 
   // Initialize Theme and Entries
   useEffect(() => {
@@ -159,6 +164,10 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  if (!isLogged) {
+    return <AuthModal onSuccess={() => setIsLogged(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-slate-50 via-indigo-50/20 to-teal-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -248,6 +257,18 @@ export default function App() {
                 Breathing Oasis
               </button>
             </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={() => {
+                localStorage.removeItem('aura_user_logged');
+                localStorage.removeItem('aura_custom_api_key');
+                setIsLogged(false);
+              }}
+              className="px-3.5 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 rounded-xl transition-all cursor-pointer border border-rose-100/40 dark:border-rose-900/40"
+            >
+              Log Out
+            </button>
           </div>
         </header>
 
@@ -255,31 +276,47 @@ export default function App() {
         {activeTab === 'tracker' ? (
           <div className="space-y-8">
             {/* Analytics Dashboard Grid */}
-            <Stats entries={entries} />
+            <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-500/10 via-teal-500/5 to-transparent dark:from-indigo-500/15 dark:via-purple-500/5 p-6 border border-indigo-100/50 dark:border-indigo-950/30">
+              <div className="absolute top-0 right-0 -w-64 -h-64 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 -w-64 -h-64 bg-teal-400/5 rounded-full blur-3xl pointer-events-none"></div>
+              <Stats entries={entries} />
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Mood Selector/Logger */}
               <div className="lg:col-span-7 space-y-6">
-                <MoodSelector onSaveEntry={handleSaveEntry} recentHistory={entries} />
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-teal-500 rounded-2xl blur-xs opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+                  <div className="relative">
+                    <MoodSelector onSaveEntry={handleSaveEntry} recentHistory={entries} />
+                  </div>
+                </div>
               </div>
 
               {/* Box Breathing Mini Panel */}
               <div className="lg:col-span-5 space-y-6">
-                <BreathingExercise />
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500 to-indigo-500 rounded-2xl blur-xs opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+                  <div className="relative">
+                    <BreathingExercise />
+                  </div>
+                </div>
                 
                 {/* Daily Quote widget */}
-                <div className="bg-gradient-to-br from-indigo-50/50 via-teal-50/50 to-white dark:from-slate-900/30 dark:via-slate-900/10 dark:to-slate-900/40 rounded-2xl p-6 border border-indigo-100/50 dark:border-indigo-950/40 shadow-sm">
+                <div className="bg-white/70 backdrop-blur-md dark:bg-slate-900/60 rounded-2xl p-6 border border-indigo-50/50 dark:border-indigo-950/40 shadow-xs relative overflow-hidden transition-all duration-300 hover:shadow-md hover:border-indigo-100/80 dark:hover:border-indigo-900/60">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-indigo-500/5 to-transparent rounded-bl-full pointer-events-none"></div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Sparkles size={16} className="text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                    <Sparkles size={16} className="text-indigo-500 dark:text-indigo-400 animate-pulse" />
                     <h4 className="font-sans font-semibold text-slate-800 dark:text-slate-200 text-sm tracking-tight">Today's Wisdom</h4>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans leading-relaxed italic">
                     &ldquo;Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.&rdquo;
                   </p>
-                  <p className="text-[10px] text-slate-450 dark:text-slate-500 font-sans mt-2 italic">
+                  <p className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-sans mt-2 font-medium">
                     — Thich Nhat Hanh
                   </p>
                 </div>
+
               </div>
             </div>
 

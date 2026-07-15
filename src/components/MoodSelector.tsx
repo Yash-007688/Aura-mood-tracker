@@ -53,11 +53,17 @@ export default function MoodSelector({ onSaveEntry, recentHistory }: MoodSelecto
         ? `something else: ${customMood.trim()}` 
         : MOODS_CONFIG[selectedMood].label;
 
+      const customKey = localStorage.getItem('aura_custom_api_key') || '';
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (customKey) {
+        headers['x-api-key'] = customKey;
+      }
+
       const response = await fetch('/api/generate-reflection', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           mood: resolvedMoodLabel,
           moodKey: selectedMood,
